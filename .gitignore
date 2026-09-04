@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Generated output - không commit media nặng
+generated/scripts/*
+generated/html/*
+generated/audio/*
+generated/videos/*
+!generated/scripts/.gitkeep
+!generated/html/.gitkeep
+!generated/audio/.gitkeep
+!generated/videos/.gitkeep
+
+# Assets nặng (ảnh/model) nếu cần loại
+*.gguf
+*.wav
+*.mp4
+*.webm
+
+# Env / secrets
+.env
+*.log
+
+# Kaggle
+.ipynb_checkpoints/
