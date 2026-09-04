@@ -1,0 +1,40 @@
+{
+  "duration": 20,
+  "scenes": [
+    {
+      "text": "Hom nay chung ta so sanh A va B.",
+      "image": "both",
+      "character": "center",
+      "animation": "intro",
+      "duration": 4
+    },
+    {
+      "text": "A noi bat ve hieu nang.",
+      "image": "A",
+      "character": "pointLeft",
+      "animation": "showA",
+      "duration": 5
+    },
+    {
+      "text": "B noi bat hon o camera.",
+      "image": "B",
+      "character": "pointRight",
+      "animation": "showB",
+      "duration": 5
+    },
+    {
+      "text": "Ca hai deu co diem manh rieng.",
+      "image": "both",
+      "character": "center",
+      "animation": "compare",
+      "duration": 4
+    },
+    {
+      "text": "Cam on da theo doi!",
+      "image": "both",
+      "character": "center",
+      "animation": "outro",
+      "duration": 2
+    }
+  ]
+}
