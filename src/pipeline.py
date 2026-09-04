@@ -1,32 +1,34 @@
 """
-pipeline.py - Phase 1 MVP
+pipeline.py
 
-Scene JSON (hand-written, no AI yet) -> render_html -> record_html -> ffmpeg -> final.mp4
+Phase 1 (generate_video_phase1): Scene JSON (hand-typed durations, no AI)
+-> render -> record (silent) -> ffmpeg -> final.mp4 (no audio).
 
-Run from the project root in a Kaggle notebook cell:
+Phase 2 (generate_video_phase2): TTS synthesizes each scene's audio first,
+REAL measured durations overwrite the scene JSON's durations, then
+render -> record (silent) -> mux with the narration track -> final.mp4
+(with audio). Audio is always the source of truth for timing, never a
+guess.
+
+Run from the project root in a Kaggle notebook cell (top-level await is
+supported directly in Jupyter/Kaggle cells):
 
     import sys
     sys.path.insert(0, "src")
-    from pipeline import generate_video_phase1
-    import asyncio
+    from pipeline import generate_video_phase2
 
     assets = {
-        "background": "assets/background.png",
+        "background": "assets/background.jpg",
         "character": "assets/character.png",
         "image_a": "assets/A.jpg",
         "image_b": "assets/B.jpg",
     }
-    result = await generate_video_phase1(
+    result = await generate_video_phase2(
         scene_json_path="generated/scripts/example_scene.json",
         assets=assets,
-        run_id="test_run_001",
+        run_id="test_run_002",
     )
     print("DONE:", result)
-
-(Use `await generate_video_phase1(...)` directly in a notebook cell -
-Jupyter/Kaggle cells support top-level await. Only use asyncio.run(...)
-when running this file as a plain `python pipeline.py` script, not inside
-a notebook.)
 """
 
 import json
@@ -61,7 +63,27 @@ def convert_to_mp4(webm_path: Path, run_id: str) -> Path:
     return mp4_path
 
 
+def mux_audio_video(silent_video_path: Path, narration_path: Path, run_id: str) -> Path:
+    """Combine the silent recorded video with the concatenated TTS narration track."""
+    final_path = silent_video_path.parent / f"{run_id}_final.mp4"
+    subprocess.run(
+        [
+            "ffmpeg", "-y",
+            "-i", str(silent_video_path),
+            "-i", str(narration_path),
+            "-c:v", "copy",
+            "-c:a", "aac",
+            "-shortest",
+            str(final_path),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    return final_path
+
+
 async def generate_video_phase1(scene_json_path: str, assets: dict, run_id: str) -> Path:
+    """No TTS - scene durations come straight from the hand-typed JSON."""
     scene_json = load_scene_json(scene_json_path)
 
     html_path = render_html(scene_json, assets, run_id)
@@ -71,25 +93,52 @@ async def generate_video_phase1(scene_json_path: str, assets: dict, run_id: str)
     print(f"[pipeline] Video recorded: {webm_path}")
 
     mp4_path = convert_to_mp4(webm_path, run_id)
-    print(f"[pipeline] Final MP4: {mp4_path}")
+    print(f"[pipeline] Final MP4 (no audio): {mp4_path}")
 
     return mp4_path
+
+
+async def generate_video_phase2(scene_json_path: str, assets: dict, run_id: str, voice: str = None) -> Path:
+    """TTS per scene -> real durations overwrite scene JSON -> render -> record -> mux audio."""
+    from tts import synthesize_all_scenes, concat_audio, DEFAULT_VOICE
+
+    scene_json = load_scene_json(scene_json_path)
+
+    tts_result = await synthesize_all_scenes(scene_json, run_id, voice=voice or DEFAULT_VOICE)
+    scene_json = tts_result["scene_json"]  # durations are now real, measured values
+    print(f"[pipeline] TTS generated for {len(tts_result['audio_paths'])} scenes")
+
+    narration_path = concat_audio(tts_result["audio_paths"], run_id)
+    print(f"[pipeline] Narration track: {narration_path}")
+
+    html_path = render_html(scene_json, assets, run_id)
+    print(f"[pipeline] HTML rendered: {html_path}")
+
+    webm_path = await record_html(html_path, run_id)
+    print(f"[pipeline] Video (silent) recorded: {webm_path}")
+
+    silent_mp4_path = convert_to_mp4(webm_path, run_id)
+
+    final_path = mux_audio_video(silent_mp4_path, narration_path, run_id)
+    print(f"[pipeline] Final MP4 (with audio): {final_path}")
+
+    return final_path
 
 
 if __name__ == "__main__":
     import asyncio
 
     assets = {
-        "background": str(BASE_DIR / "assets" / "background.png"),
+        "background": str(BASE_DIR / "assets" / "background.jpg"),
         "character": str(BASE_DIR / "assets" / "character.png"),
         "image_a": str(BASE_DIR / "assets" / "A.jpg"),
         "image_b": str(BASE_DIR / "assets" / "B.jpg"),
     }
     result = asyncio.run(
-        generate_video_phase1(
+        generate_video_phase2(
             scene_json_path=str(BASE_DIR / "generated" / "scripts" / "example_scene.json"),
             assets=assets,
-            run_id="test_run_001",
+            run_id="test_run_002",
         )
     )
     print("DONE:", result)

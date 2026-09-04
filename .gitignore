@@ -13,7 +13,7 @@ generated/videos/*
 !generated/html/.gitkeep
 !generated/audio/.gitkeep
 !generated/videos/.gitkeep
-
+!generated/scripts/example_scene.json
 # Assets nặng (ảnh/model) nếu cần loại
 *.gguf
 *.wav

@@ -43,14 +43,16 @@ html, body {
   position: absolute;
   bottom: 5%;
   left: 50%;
-  width: 220px;
+  width: 420px;              /* was 220px - too small on a 1080x1920 stage */
   transform: translateX(-50%);
   transition: transform 0.4s ease;
   z-index: 5;
 }
 
-.character.char--left  { transform: translateX(-50%) translateX(-160px) scaleX(1); }
-.character.char--right { transform: translateX(-50%) translateX(160px) scaleX(-1); }
+/* Asset (nguoique.png) faces right by default, so only "point left"
+   needs a horizontal flip - "point right" keeps the natural orientation. */
+.character.char--left  { transform: translateX(-50%) translateX(-220px) scaleX(-1); }
+.character.char--right { transform: translateX(-50%) translateX(220px) scaleX(1); }
 
 .caption {
   position: absolute;

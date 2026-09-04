@@ -2,35 +2,35 @@
   "duration": 20,
   "scenes": [
     {
-      "text": "Hom nay chung ta so sanh A va B.",
+      "text": "Hôm nay chúng ta sẽ so sánh Chanel và Dior.",
       "image": "both",
       "character": "center",
       "animation": "intro",
       "duration": 4
     },
     {
-      "text": "A noi bat ve hieu nang.",
+      "text": "Chanel nổi bật với phong cách thanh lịch cổ điển.",
       "image": "A",
       "character": "pointLeft",
       "animation": "showA",
       "duration": 5
     },
     {
-      "text": "B noi bat hon o camera.",
+      "text": "Trong khi đó Dior lại ghi điểm ở sự hiện đại và táo bạo.",
       "image": "B",
       "character": "pointRight",
       "animation": "showB",
       "duration": 5
     },
     {
-      "text": "Ca hai deu co diem manh rieng.",
+      "text": "Cả hai thương hiệu đều có dấu ấn riêng trong làng thời trang.",
       "image": "both",
       "character": "center",
       "animation": "compare",
       "duration": 4
     },
     {
-      "text": "Cam on da theo doi!",
+      "text": "Cảm ơn các bạn đã theo dõi!",
       "image": "both",
       "character": "center",
       "animation": "outro",
