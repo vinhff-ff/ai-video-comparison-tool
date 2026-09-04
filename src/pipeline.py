@@ -10,6 +10,13 @@ render -> record (silent) -> mux with the narration track -> final.mp4
 (with audio). Audio is always the source of truth for timing, never a
 guess.
 
+TTS engine is pluggable:
+    engine="edge"   – Microsoft Edge neural TTS (free, no GPU, no API key)
+                       default voice: vi-VN-HoaiMyNeural
+    engine="vieneu"  – VieNeu-TTS v3 Turbo on Kaggle GPU (48 kHz,
+                       20 preset voices + instant voice cloning)
+                       default voice: "Adam" (Southern male)
+
 Run from the project root in a Kaggle notebook cell (top-level await is
 supported directly in Jupyter/Kaggle cells):
 
@@ -23,12 +30,31 @@ supported directly in Jupyter/Kaggle cells):
         "image_a": "assets/A.jpg",
         "image_b": "assets/B.jpg",
     }
+
+    # Edge TTS (free, default)
     result = await generate_video_phase2(
         scene_json_path="generated/scripts/example_scene.json",
         assets=assets,
-        run_id="test_run_002",
+        run_id="test_run_001",
     )
-    print("DONE:", result)
+
+    # VieNeu TTS – preset voice
+    result = await generate_video_phase2(
+        scene_json_path="generated/scripts/example_scene.json",
+        assets=assets,
+        run_id="test_run_vieneu_preset",
+        engine="vieneu",
+        voice="Phạm Tuyên",
+    )
+
+    # VieNeu TTS – voice cloning from a reference clip
+    result = await generate_video_phase2(
+        scene_json_path="generated/scripts/example_scene.json",
+        assets=assets,
+        run_id="test_run_vieneu_clone",
+        engine="vieneu",
+        ref_audio="assets/my_voice_sample.wav",
+    )
 """
 
 import json
@@ -98,15 +124,32 @@ async def generate_video_phase1(scene_json_path: str, assets: dict, run_id: str)
     return mp4_path
 
 
-async def generate_video_phase2(scene_json_path: str, assets: dict, run_id: str, voice: str = None) -> Path:
-    """TTS per scene -> real durations overwrite scene JSON -> render -> record -> mux audio."""
-    from tts import synthesize_all_scenes, concat_audio, DEFAULT_VOICE
+async def generate_video_phase2(
+    scene_json_path: str,
+    assets: dict,
+    run_id: str,
+    engine: str = "edge",
+    voice: str = None,
+    ref_audio: str = None,
+) -> Path:
+    """TTS per scene -> real durations overwrite scene JSON -> render -> record -> mux audio.
+
+    engine:    "edge" (default) or "vieneu".
+    voice:     voice name for the chosen engine (see tts.py docstring).
+    ref_audio: (vieneu only) path to a reference .wav clip for voice cloning.
+    """
+    from tts import synthesize_all_scenes, concat_audio
 
     scene_json = load_scene_json(scene_json_path)
 
-    tts_result = await synthesize_all_scenes(scene_json, run_id, voice=voice or DEFAULT_VOICE)
+    tts_result = await synthesize_all_scenes(
+        scene_json, run_id,
+        engine=engine,
+        voice=voice,
+        ref_audio=ref_audio,
+    )
     scene_json = tts_result["scene_json"]  # durations are now real, measured values
-    print(f"[pipeline] TTS generated for {len(tts_result['audio_paths'])} scenes")
+    print(f"[pipeline] TTS ({engine}) generated for {len(tts_result['audio_paths'])} scenes")
 
     narration_path = concat_audio(tts_result["audio_paths"], run_id)
     print(f"[pipeline] Narration track: {narration_path}")
@@ -134,11 +177,39 @@ if __name__ == "__main__":
         "image_a": str(BASE_DIR / "assets" / "A.jpg"),
         "image_b": str(BASE_DIR / "assets" / "B.jpg"),
     }
+
+    # --- edge-tts (default) ---------------------------------------------------
     result = asyncio.run(
         generate_video_phase2(
             scene_json_path=str(BASE_DIR / "generated" / "scripts" / "example_scene.json"),
             assets=assets,
-            run_id="test_run_002",
+            run_id="test_edge",
+            engine="edge",
         )
     )
-    print("DONE:", result)
+    print("DONE (edge):", result)
+
+    # --- VieNeu-TTS v3 Turbo – preset voice -----------------------------------
+    result = asyncio.run(
+        generate_video_phase2(
+            scene_json_path=str(BASE_DIR / "generated" / "scripts" / "example_scene.json"),
+            assets=assets,
+            run_id="test_vieneu_preset",
+            engine="vieneu",
+            voice="Phạm Tuyên",
+        )
+    )
+    print("DONE (vieneu preset):", result)
+
+    # --- VieNeu-TTS v3 Turbo – voice cloning ----------------------------------
+    ref_clip = str(BASE_DIR / "assets" / "my_voice_sample.wav")
+    result = asyncio.run(
+        generate_video_phase2(
+            scene_json_path=str(BASE_DIR / "generated" / "scripts" / "example_scene.json"),
+            assets=assets,
+            run_id="test_vieneu_clone",
+            engine="vieneu",
+            ref_audio=ref_clip,
+        )
+    )
+    print("DONE (vieneu clone):", result)

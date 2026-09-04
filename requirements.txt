@@ -4,3 +4,7 @@ playwright
 ffmpeg-python
 ddgs
 edge-tts
+# VieNeu-TTS v3 Turbo – on Kaggle GPU (PyTorch pre-installed)
+# transformers pin matches the official recommendation for stable GPU SDK
+vieneu
+transformers==4.57.6
