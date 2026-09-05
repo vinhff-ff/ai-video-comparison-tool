@@ -5,16 +5,16 @@ TOPIC_A = {topic_a}
 TOPIC_B = {topic_b}
 
 Viết ĐÚNG 6 câu thoại, mỗi câu một dòng (Mảng 6 chuỗi), theo cấu trúc:
-1. Ngay giây đầu tiên chỉ thẳng vào vật A và nói về nó luôn (nhân vật chỉ về phía A).
-2. Chuyển sang chỉ vật B và chê/khen vật B (nhân vật chỉ về phía B).
+1. Mở thẳng: "Đây là <tên vật A>..." rồi nói về vật A luôn (nhân vật chỉ về phía A). Ví dụ: "Đây là SH, xe này...". 
+2. Tiếp: "Đây là <tên vật B>..." rồi nói về vật B (nhân vật chỉ về phía B). Ví dụ: "Đây là PG-1, ...".
 3. Hỏi: hai thứ này khác gì nhau? (giọng băn khoăn).
 4. Nêu một đặc điểm nổi bật của vật A.
 5. Nêu một đặc điểm nổi bật của vật B.
 6. Chốt vui kiểu: "sản phẩm tốt nhất mình để vào giỏ hàng nhé".
 
-Lưu ý: mỗi câu ngắn gọn (dưới 25 từ), có thêm chút châm biếm dễ hiểu, tự nhiên.
+Lưu ý: mỗi câu ngắn gọn (dưới 25 từ), có thêm chút châm biếm dễ hiểu, tự nhiên. Dùng đúng tên thật của sản phẩm thay vì chữ "vật A"/"vật B".
 
-TUYỆT ĐỐI CẤM các kiểu mở bài như: "Đây là...", "Này, đây là...", "Hôm nay mình sẽ...", "Các bạn thấy đấy...", "À đây rồi...". Vào thẳng nội dung, vừa lên hình là chỉ vào sản phẩm và nói chất liệu/nhận xét ngay.
+TUYỆT ĐỐI KHÔNG thêm bất kỳ chữ đệm nào ĐẰNG TRƯỚC "Đây là": cấm "Này, đây là...", "À đây là...", "Các bạn thấy đấy...", "Ôi...", "Hôm nay...". Để "Đây là" là chữ đầu tiên của câu.
 
 Chỉ trả về JSON hợp lệ, không giải thích:
 ["câu 1", "câu 2", "câu 3", "câu 4", "câu 5", "câu 6"]
