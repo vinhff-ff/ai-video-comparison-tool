@@ -3,7 +3,7 @@
 // in Scene JSON ("animation": "<name>") - it never writes new animation code.
 const AnimationLibrary = {
   intro(ctx)   { Character.center(); ImagesCtl.hideAll(); ctx.stage.classList.remove("fade-out"); },
-  outro(ctx)   { Character.center(); ctx.stage.classList.add("fade-out"); },
+  outro(ctx)   { Character.center(); ctx.stage.classList.remove("fade-out"); }, // no dark fade at the end
   fadeIn(ctx)  { ctx.stage.classList.remove("fade-out"); ctx.stage.classList.add("fade-in"); },
   fadeOut(ctx) { ctx.stage.classList.remove("fade-in"); ctx.stage.classList.add("fade-out"); },
   slideLeft(ctx)  { ctx.stage.classList.add("slide-left"); },
@@ -13,18 +13,27 @@ const AnimationLibrary = {
   showA(ctx)   { ImagesCtl.showA(); },
   showB(ctx)   { ImagesCtl.showB(); },
   compare(ctx) { ImagesCtl.showBoth(); },
-  pointLeft(ctx)  { Character.pointLeft(); },
-  pointRight(ctx) { Character.pointRight(); },
+  showConfused(ctx) { Character.show("confused"); },
+  showCart(ctx)     { Character.show("cart"); },
 };
+
+function getActiveCharacter(name) {
+  // "pointLeftUp", "pointLeft", "pointRight", "center" → main character with a pose
+  // "confused" / "cart" → dedicated extra characters
+  if (name === "confused" || name === "cart") return name;
+  return "main";
+}
 
 async function playScene(sceneData) {
   const stage = document.getElementById("stage");
   const charEl = document.getElementById("character");
+  const confusedEl = document.getElementById("character-confused");
+  const cartEl = document.getElementById("character-cart");
   const imgA = document.getElementById("image-a");
   const imgB = document.getElementById("image-b");
   const textEl = document.getElementById("caption");
 
-  Character.init(charEl);
+  Character.init(charEl, confusedEl, cartEl);
   ImagesCtl.init(imgA, imgB);
   TextCtl.init(textEl);
 
@@ -45,16 +54,16 @@ async function playScene(sceneData) {
     else if (scene.image === "both") ImagesCtl.showBoth();
     else ImagesCtl.hideAll();
 
-    // Character pose this scene
+    // Character pose this scene (main character + pose, or extra character)
+    Character.show(getActiveCharacter(scene.character));
     if (scene.character === "pointLeft") Character.pointLeft();
+    else if (scene.character === "pointLeftUp") Character.pointLeftUp();
     else if (scene.character === "pointRight") Character.pointRight();
     else if (scene.character === "center") Character.center();
 
     // Caption text this scene
     TextCtl.setText(scene.text);
 
-    // Phase 1: no audio yet, so each scene's own "duration" (seconds) drives timing.
-    // Phase 2 will replace this with audio.currentTime-based sync.
     const durationMs = (scene.duration || 4) * 1000;
     await new Promise((resolve) => setTimeout(resolve, durationMs));
   }

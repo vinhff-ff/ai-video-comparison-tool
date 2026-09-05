@@ -27,6 +27,8 @@ supported directly in Jupyter/Kaggle cells):
     assets = {
         "background": "assets/background.jpg",
         "character": "assets/character.png",
+        "character_confused": "assets/character_confused.png",  # optional
+        "character_cart": "assets/character_cart.png",          # optional
         "image_a": "assets/A.jpg",
         "image_b": "assets/B.jpg",
     }
@@ -174,6 +176,8 @@ if __name__ == "__main__":
     assets = {
         "background": str(BASE_DIR / "assets" / "background.jpg"),
         "character": str(BASE_DIR / "assets" / "character.png"),
+        "character_confused": str(BASE_DIR / "assets" / "character_confused.png"),
+        "character_cart": str(BASE_DIR / "assets" / "character_cart.png"),
         "image_a": str(BASE_DIR / "assets" / "A.jpg"),
         "image_b": str(BASE_DIR / "assets" / "B.jpg"),
     }

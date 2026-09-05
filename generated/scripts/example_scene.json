@@ -1,40 +1,47 @@
 {
-  "duration": 20,
+  "duration": 24,
   "scenes": [
     {
-      "text": "Hôm nay chúng ta sẽ so sánh Chanel và Dior.",
-      "image": "both",
-      "character": "center",
-      "animation": "intro",
+      "text": "Đây là vật A.",
+      "image": "A",
+      "character": "pointLeftUp",
+      "animation": "showA",
       "duration": 4
     },
     {
-      "text": "Chanel nổi bật với phong cách thanh lịch cổ điển.",
-      "image": "A",
-      "character": "pointLeft",
-      "animation": "showA",
-      "duration": 5
-    },
-    {
-      "text": "Trong khi đó Dior lại ghi điểm ở sự hiện đại và táo bạo.",
+      "text": "Đây là vật B.",
       "image": "B",
       "character": "pointRight",
       "animation": "showB",
-      "duration": 5
+      "duration": 4
     },
     {
-      "text": "Cả hai thương hiệu đều có dấu ấn riêng trong làng thời trang.",
+      "text": "Vậy hai vật này khác gì nhau?",
       "image": "both",
-      "character": "center",
+      "character": "confused",
       "animation": "compare",
       "duration": 4
     },
     {
-      "text": "Cảm ơn các bạn đã theo dõi!",
+      "text": "Vật A nổi bật với tính năng xịn xò.",
+      "image": "A",
+      "character": "pointLeft",
+      "animation": "showA",
+      "duration": 4
+    },
+    {
+      "text": "Còn vật B lại ghi điểm với thiết kế sang trọng.",
+      "image": "B",
+      "character": "pointRight",
+      "animation": "showB",
+      "duration": 4
+    },
+    {
+      "text": "Sản phẩm tốt nhất mình để trong giỏ hàng nhé!",
       "image": "both",
-      "character": "center",
-      "animation": "outro",
-      "duration": 2
+      "character": "cart",
+      "animation": "compare",
+      "duration": 4
     }
   ]
 }
