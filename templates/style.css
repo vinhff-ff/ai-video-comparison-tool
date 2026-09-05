@@ -60,13 +60,14 @@ html, body {
 .character.char--left  { transform: translateX(-50%) scaleX(-1); }
 .character.char--right { transform: translateX(-50%) scaleX(1); }
 
-/* Cart character sits on the LEFT edge, raised a bit so its hands
-   point at the cart, and stays readable on TikTok's 9:16 frame. */
+/* Cart character: anchored to the LEFT edge, raised so its hands aim at the
+   cart. The PNG content sits on the right half of the frame, so we mirror it
+   horizontally (scaleX(-1)) to make the character stand under image A (left). */
 .character--cart {
   left: 0;
   bottom: 120px;                   /* raised so hands aim at the cart */
   height: 1000px;                  /* ~52% of the 1920px-tall stage */
-  transform: translateX(0) scaleX(1);
+  transform: translateX(0) scaleX(-1);
 }
 
 .caption {
