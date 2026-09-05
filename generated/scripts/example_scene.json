@@ -1,43 +1,43 @@
 {
-  "duration": 24,
+  "duration": 28,
   "scenes": [
     {
-      "text": "Đây là vật A.",
+      "text": "Đây là vật A. Tự nhận hàng hiệu đấy, nhưng nhìn thiết kế này thì... bình thường như bao người thôi.",
       "image": "A",
       "character": "pointLeftUp",
       "animation": "showA",
       "duration": 4
     },
     {
-      "text": "Đây là vật B.",
+      "text": "Còn đây là vật B. Ừm, em này mới đúng chất tiền nào của nấy.",
       "image": "B",
       "character": "pointRight",
       "animation": "showB",
       "duration": 4
     },
     {
-      "text": "Vậy hai vật này khác gì nhau?",
+      "text": "Thế hai đứa khác nhau chỗ nào? Khác nhau hết trơn, chỉ khổ cái giá thì y chang nhau.",
       "image": "both",
       "character": "confused",
       "animation": "compare",
       "duration": 4
     },
     {
-      "text": "Vật A nổi bật với tính năng xịn xò.",
+      "text": "Vật A ghi trên hộp là tính năng xịn xò, đỉnh của chóp luôn á. Giá mà được xài thử thì tốt.",
       "image": "A",
       "character": "pointLeft",
       "animation": "showA",
       "duration": 4
     },
     {
-      "text": "Còn vật B lại ghi điểm với thiết kế sang trọng.",
+      "text": "Còn vật B được cái mác sang trọng treo cho sang. Nhưng sang mà không xài thì cũng hơi phí.",
       "image": "B",
       "character": "pointRight",
       "animation": "showB",
       "duration": 4
     },
     {
-      "text": "Sản phẩm tốt nhất mình để trong giỏ hàng nhé!",
+      "text": "Sản phẩm tốt nhất mình cứ quăng vào giỏ hàng cái đã. Mua xong xài thế nào thì... chốt đơn đã.",
       "image": "both",
       "character": "cart",
       "animation": "compare",

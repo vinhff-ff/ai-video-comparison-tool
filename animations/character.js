@@ -32,11 +32,12 @@ const Character = {
     this.els.main.classList.add("char--left");
   },
 
-  // Character flips to face the left and tilts up toward the image on top-left.
+  // Character flips to face the left (no body rotation) - used for the
+  // opening line pointing at object A on the top-left.
   pointLeftUp() {
     this.show("main");
     this.els.main.classList.remove("char--right");
-    this.els.main.classList.add("char--left", "char--up");
+    this.els.main.classList.add("char--left");
   },
 
   pointRight() {

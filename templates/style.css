@@ -56,15 +56,15 @@ html, body {
 
 /* Asset (nguoique.png) faces right by default, so only "point left" needs
    a horizontal flip - "point right" keeps the natural orientation.
-   "point left-up" also tilts up toward the image on the top-left. */
+   No body rotation: the flip alone faces the character toward the top-left. */
 .character.char--left  { transform: translateX(-50%) scaleX(-1); }
 .character.char--right { transform: translateX(-50%) scaleX(1); }
-.character.char--left.char--up { transform: translateX(-50%) scaleX(-1) rotate(-14deg); }
 
-/* Cart character sits on the LEFT edge and is larger, so the product +
-   "giỏ hàng" line reads clearly on TikTok's 9:16 portrait frame. */
+/* Cart character sits on the LEFT edge, raised a bit so its hands
+   point at the cart, and stays readable on TikTok's 9:16 frame. */
 .character--cart {
   left: 0;
+  bottom: 120px;                   /* raised so hands aim at the cart */
   height: 1000px;                  /* ~52% of the 1920px-tall stage */
   transform: translateX(0) scaleX(1);
 }

@@ -7,8 +7,17 @@ Phase 1 (generate_video_phase1): Scene JSON (hand-typed durations, no AI)
 Phase 2 (generate_video_phase2): TTS synthesizes each scene's audio first,
 REAL measured durations overwrite the scene JSON's durations, then
 render -> record (silent) -> mux with the narration track -> final.mp4
-(with audio). Audio is always the source of truth for timing, never a
-guess.
+(with audio). Audio is always the source of truth for timing, never a guess.
+
+Phase 3 (generate_video_phase3): FULLY AUTOMATIC — feed two product names
+(topic_a, topic_b), and the pipeline itself:
+  1. researcher.py  – DDGS web search + LLM brief of key points per product
+  2. script_writer.py – LLM writes a 6-line Vietnamese script (funny/sarcastic)
+  3. designer.py    – maps the script to Scene JSON (fixed visual template)
+  4. validator.py   – checks animations/characters/images against the library
+  then runs the same TTS→render→record→mux tail as phase 2.
+The Lean model runs LOCALLY on Kaggle's GPU via llama.cpp (Qwen2.5-7B GGUF,
+auto-downloaded on first use).
 
 TTS engine is pluggable:
     engine="edge"   – Microsoft Edge neural TTS (free, no GPU, no API key)
@@ -22,7 +31,7 @@ supported directly in Jupyter/Kaggle cells):
 
     import sys
     sys.path.insert(0, "src")
-    from pipeline import generate_video_phase2
+    from pipeline import generate_video_phase2, generate_video_phase3
 
     assets = {
         "background": "assets/background.jpg",
@@ -33,29 +42,16 @@ supported directly in Jupyter/Kaggle cells):
         "image_b": "assets/B.jpg",
     }
 
-    # Edge TTS (free, default)
+    # Phase 2 (from a scene JSON file, e.g. hand-edited)
     result = await generate_video_phase2(
         scene_json_path="generated/scripts/example_scene.json",
-        assets=assets,
-        run_id="test_run_001",
+        assets=assets, run_id="test_run_001",
     )
 
-    # VieNeu TTS – preset voice
-    result = await generate_video_phase2(
-        scene_json_path="generated/scripts/example_scene.json",
-        assets=assets,
-        run_id="test_run_vieneu_preset",
-        engine="vieneu",
-        voice="Phạm Tuyên",
-    )
-
-    # VieNeu TTS – voice cloning from a reference clip
-    result = await generate_video_phase2(
-        scene_json_path="generated/scripts/example_scene.json",
-        assets=assets,
-        run_id="test_run_vieneu_clone",
-        engine="vieneu",
-        ref_audio="assets/my_voice_sample.wav",
+    # Phase 3 (LLM auto-generates everything)
+    result = await generate_video_phase3(
+        topic_a="Chanel nước hoa", topic_b="Dior nước hoa",
+        assets=assets, run_id="test_run_003",
     )
 """
 
@@ -126,23 +122,10 @@ async def generate_video_phase1(scene_json_path: str, assets: dict, run_id: str)
     return mp4_path
 
 
-async def generate_video_phase2(
-    scene_json_path: str,
-    assets: dict,
-    run_id: str,
-    engine: str = "edge",
-    voice: str = None,
-    ref_audio: str = None,
-) -> Path:
-    """TTS per scene -> real durations overwrite scene JSON -> render -> record -> mux audio.
-
-    engine:    "edge" (default) or "vieneu".
-    voice:     voice name for the chosen engine (see tts.py docstring).
-    ref_audio: (vieneu only) path to a reference .wav clip for voice cloning.
-    """
+async def _tts_and_mux(scene_json: dict, assets: dict, run_id: str,
+                       engine: str, voice: str, ref_audio: str) -> Path:
+    """Shared tail of phases 2/3: TTS → real durations → render → record → mux."""
     from tts import synthesize_all_scenes, concat_audio
-
-    scene_json = load_scene_json(scene_json_path)
 
     tts_result = await synthesize_all_scenes(
         scene_json, run_id,
@@ -168,6 +151,69 @@ async def generate_video_phase2(
     print(f"[pipeline] Final MP4 (with audio): {final_path}")
 
     return final_path
+
+
+async def generate_video_phase2(
+    scene_json_path: str,
+    assets: dict,
+    run_id: str,
+    engine: str = "edge",
+    voice: str = None,
+    ref_audio: str = None,
+) -> Path:
+    """From a scene JSON file: TTS -> real durations -> render -> record -> mux audio.
+
+    engine:    "edge" (default) or "vieneu".
+    voice:     voice name for the chosen engine (see tts.py docstring).
+    ref_audio: (vieneu only) path to a reference .wav clip for voice cloning.
+    """
+    scene_json = load_scene_json(scene_json_path)
+    return await _tts_and_mux(scene_json, assets, run_id, engine, voice, ref_audio)
+
+
+async def generate_video_phase3(
+    topic_a: str,
+    topic_b: str,
+    assets: dict,
+    run_id: str,
+    engine: str = "edge",
+    voice: str = None,
+    ref_audio: str = None,
+    style: str = "hài hước, châm biếm",
+    model_path: str = None,
+) -> Path:
+    """Fully automatic: web research → LLM script → designer → validator → video.
+
+    topic_a/topic_b: two products to compare (any short description, e.g. names).
+    style:           tone for the LLM script (default: funny/sarcastic).
+    model_path:      path to a GGUF model; None → auto-download Qwen2.5-7B-Instruct.
+    engine/voice/ref_audio: same TTS options as phase 2.
+    """
+    from researcher import research_products_async
+    from script_writer import write_script_async
+    from designer import design_scenes
+    from validator import validate_scene_json
+
+    brief = await research_products_async(topic_a, topic_b)
+    print(f"[pipeline] Research done: A={len(brief['topic_a'])} pts, B={len(brief['topic_b'])} pts")
+
+    script = await write_script_async(brief, style=style, model_path=model_path)
+    print(f"[pipeline] Script generated ({len(script)} lines).")
+
+    scene_json = design_scenes(script)
+    validate_scene_json(scene_json)
+    print(f"[pipeline] Scene JSON validated ({len(scene_json['scenes'])} scenes).")
+
+    # Save the auto-generated scene JSON for inspection/reuse
+    scenes_dir = BASE_DIR / "generated" / "scripts"
+    scenes_dir.mkdir(parents=True, exist_ok=True)
+    out_path = scenes_dir / f"{run_id}.json"
+    out_path.write_text(
+        json.dumps(scene_json, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"[pipeline] Scene JSON saved: {out_path}")
+
+    return await _tts_and_mux(scene_json, assets, run_id, engine, voice, ref_audio)
 
 
 if __name__ == "__main__":
@@ -217,3 +263,14 @@ if __name__ == "__main__":
         )
     )
     print("DONE (vieneu clone):", result)
+
+    # --- Phase 3: LLM tự sinh toàn bộ -------------------------------------------------
+    result = asyncio.run(
+        generate_video_phase3(
+            topic_a="Chanel nước hoa",
+            topic_b="Dior nước hoa",
+            assets=assets,
+            run_id="test_phase3",
+        )
+    )
+    print("DONE (phase3 LLM):", result)
