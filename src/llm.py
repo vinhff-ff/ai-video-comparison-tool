@@ -13,7 +13,7 @@ break downstream parsing.
 import json
 import re
 from pathlib import Path
-
+import ast 
 from huggingface_hub import hf_hub_download, list_repo_files
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -115,10 +115,27 @@ def _extract_json(text: str):
     text = text.strip()
     text = re.sub(r"^```(?:json)?\s*", "", text)
     text = re.sub(r"\s*```$", "", text)
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
+
+    def _try_parse(s: str):
+        # 1. Thử JSON chuẩn trước
+        try:
+            return json.loads(s)
+        except Exception:
+            pass
+        # 2. Fallback: parse như Python literal — bắt được case model
+        #    trộn lẫn single/double quote (vẫn là cú pháp Python hợp lệ)
+        try:
+            result = ast.literal_eval(s)
+            if isinstance(result, (list, dict)):
+                return result
+        except Exception:
+            pass
+        return None
+
+    result = _try_parse(text)
+    if result is not None:
+        return result
+
     for open_ch, close_ch in (("{", "}"), ("[", "]")):
         start = text.find(open_ch)
         if start == -1:
@@ -130,10 +147,11 @@ def _extract_json(text: str):
             elif text[i] == close_ch:
                 depth -= 1
                 if depth == 0:
-                    try:
-                        return json.loads(text[start:i + 1])
-                    except Exception:
-                        break
+                    result = _try_parse(text[start:i + 1])
+                    if result is not None:
+                        return result
+                    break
+
     raise ValueError(f"Cannot parse JSON from LLM output:\n{text[:500]}")
 
 
