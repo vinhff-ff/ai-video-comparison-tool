@@ -6,7 +6,7 @@ venv/
 
 # Generated output - không commit media nặng
 generated/scripts/*
-generated/html/*
+generated/html/*g
 generated/audio/*
 generated/videos/*
 !generated/scripts/.gitkeep
