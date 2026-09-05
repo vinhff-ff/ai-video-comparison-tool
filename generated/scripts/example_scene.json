@@ -2,14 +2,14 @@
   "duration": 28,
   "scenes": [
     {
-      "text": "Đây là vật A. Tự nhận hàng hiệu đấy, nhưng nhìn thiết kế này thì... bình thường như bao người thôi.",
+      "text": "Cái này tự nhận hàng hiệu đấy, nhưng nhìn thiết kế này thì... bình thường như bao người thôi.",
       "image": "A",
       "character": "pointLeftUp",
       "animation": "showA",
       "duration": 4
     },
     {
-      "text": "Còn đây là vật B. Ừm, em này mới đúng chất tiền nào của nấy.",
+      "text": "Còn cái này mới đúng chất tiền nào của nấy.",
       "image": "B",
       "character": "pointRight",
       "animation": "showB",
